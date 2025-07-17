@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Employee Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <div class="container">
+    <h1>Dashboard</h1>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    <div id="employee-section">
+      <h2>Employees</h2>
+      <ul id="employeeList"></ul>
+      <h2>Add Employee</h2>
+      <form id="addEmployeeForm">
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="text" name="position" placeholder="Position" required>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+    <button id="theme-toggle" style="margin-top:18px;width:100%;background:rgba(0,0,0,0.08);color:var(--primary);border:1px solid var(--primary);border-radius:8px;cursor:pointer;transition:background 0.3s;">Toggle Dark/Light Mode</button>
+  </div>
+  <script>
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
+    async function fetchEmployees() {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5000/api/employees", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const list = document.getElementById("employeeList");
+        list.innerHTML = "";
+        data.forEach(emp => {
+          const li = document.createElement("li");
+          li.textContent = `${emp.name} - ${emp.position}`;
+          list.appendChild(li);
+        });
+      } else {
+        alert(data.message);
+      }
+    }
+    document.getElementById("addEmployeeForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      const name = e.target.name.value;
+      const position = e.target.position.value;
+      const res = await fetch("http://localhost:5000/api/employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, position })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchEmployees();
+        e.target.reset();
+      } else {
+        alert(data.message);
+      }
+    });
+    // Theme toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+      if(document.documentElement.hasAttribute('data-theme')) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    });
+    fetchEmployees();
+  </script>
+</body>
+</html>

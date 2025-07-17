@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Employee Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <div class="form-container">
+    <h1>Register</h1>
+    <form id="registerForm">
+      <input type="text" placeholder="Email" name="username" required>
+      <input type="password" placeholder="Password" name="password" required>
+      <button type="submit">Register</button>
+    </form>
+    <p style="text-align:left; margin-top: 10px;">Already have an account? <a href="login.html">Login here</a></p>
+    <button id="theme-toggle" style="margin-top:18px;width:100%;background:rgba(0,0,0,0.08);color:var(--primary);border:1px solid var(--primary);border-radius:8px;cursor:pointer;transition:background 0.3s;">Toggle Dark/Light Mode</button>
+  </div>
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const username = e.target.username.value;
+      const password = e.target.password.value;
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Registration successful! Please login.");
+        window.location.href = "login.html";
+      } else {
+        alert(data.message);
+      }
+    });
+    // Theme toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+      if(document.documentElement.hasAttribute('data-theme')) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    });
+  </script>
+</body>
+</html>
